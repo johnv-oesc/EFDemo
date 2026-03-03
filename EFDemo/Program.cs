@@ -28,6 +28,19 @@ namespace EFDemo
             //ReadActorsFromCSV(headers);
 
             GetSalesByFilmCategory(context);
+
+            GetLastDayOfCurrentMonth(context);
+        }
+
+        private static void GetLastDayOfCurrentMonth(PagilaContext context)
+        {
+            var date = context.Database
+                            .SqlQuery<DateTime>(
+                                $"SELECT last_day(NOW())")
+                            .AsEnumerable()
+                            .First();
+
+            Console.WriteLine(date);
         }
 
         private static void GetFilmCountByRating(PagilaContext context)
