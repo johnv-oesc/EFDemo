@@ -1,4 +1,5 @@
 ﻿using CsvHelper;
+using CsvHelper.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Globalization;
@@ -20,20 +21,11 @@ namespace EFDemo
 
             using var context = new PagilaContext(options);
 
-            //int actorId = InsertActor(context, "Kimberly", "Collins");
-            //int filmId = InsertFilm(context, "Kimberly's Film");
-            //int sequelId = InsertFilm(context, "Kimberly's Film - The Sequel");
-            //InsertFilmActor(context, actorId, filmId);
-            //InsertFilmActor(context, actorId, sequelId);
-            //InsertFilmActor(context, actorId, sequelId);
+            //GetFilmCountByRating(context);
 
-            //GetActors(context, "Collins");
-            //GetFilms(context, DateTime.Today.Year);
-
-            GetFilmCountByRating(context);
-
-            WriteActorsToCSV(context);
-            ReadActorsFromCSV();
+            //bool headers = false;
+            //WriteActorsToCSV(context, headers);
+            //ReadActorsFromCSV(headers);
         }
 
         private static void GetFilmCountByRating(PagilaContext context)
@@ -47,25 +39,54 @@ namespace EFDemo
 
             foreach (var item in filmCountByRating)
             {
-                Console.WriteLine(item);
+                Console.WriteLine($"{item.Key}: {item.Value} films");
             }
+
+            Console.WriteLine();
         }
 
-        private static void WriteActorsToCSV(PagilaContext context)
+        private static void WriteActorsToCSV(PagilaContext context, bool useHeaders)
         {
             using var writer = new StreamWriter("actors.csv");
-            using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
 
-            var actors = context.Actors.Take(5);
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = useHeaders,
+                //Delimiter = "\t",
+            };
+
+            using var csv = new CsvWriter(writer, config);
+
+            var actors = context.Actors.Skip(5).Take(15);
             csv.WriteRecords(actors);
         }
 
-        private static void ReadActorsFromCSV()
+        private static void ReadActorsFromCSV(bool hasHeaders)
         {
             using var reader = new StreamReader("actors.csv");
             using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
 
-            var actors = csv.GetRecords<Actor>().ToList();
+            var actors = new List<Actor>();
+
+            if (hasHeaders)
+            {
+                actors = csv.GetRecords<Actor>().ToList();
+            }
+            else
+            {
+                while (!reader.EndOfStream)
+                {
+                    var line = reader.ReadLine();
+                    var parts = line.Split(','); //TODO: use csv helper
+
+                    actors.Add(new Actor
+                    {
+                        ActorId = int.Parse(parts[0]),
+                        FirstName = parts[1],
+                        LastName = parts[2]
+                    });
+                }
+            }
 
             foreach (var actor in actors)
             {
