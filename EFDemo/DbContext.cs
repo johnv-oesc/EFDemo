@@ -83,6 +83,19 @@ namespace EFDemo
                     "film_actor",
                     j => j.HasOne<Film>().WithMany().HasForeignKey("film_id"),
                     j => j.HasOne<Actor>().WithMany().HasForeignKey("actor_id"));
+
+            modelBuilder.Entity<SalesByFilmCategory>(entity =>
+            {
+                entity.ToView("sales_by_film_category");
+
+                entity.HasNoKey();
+
+                entity.Property(s => s.Category)
+                      .HasColumnName("category");
+
+                entity.Property(s => s.TotalSales)
+                      .HasColumnName("total_sales");
+            });
         }
     }
 }

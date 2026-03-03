@@ -26,6 +26,8 @@ namespace EFDemo
             //bool headers = false;
             //WriteActorsToCSV(context, headers);
             //ReadActorsFromCSV(headers);
+
+            GetSalesByFilmCategory(context);
         }
 
         private static void GetFilmCountByRating(PagilaContext context)
@@ -92,6 +94,18 @@ namespace EFDemo
             {
                 Console.WriteLine($"{actor.ActorId}: {actor.FirstName} {actor.LastName}");
             }
+        }
+
+        private static void GetSalesByFilmCategory(PagilaContext context)
+        {
+            var results = context.Set<SalesByFilmCategory>();
+
+            foreach (var result in results)
+            {
+                Console.WriteLine($"{result.Category}: {result.TotalSales:C2}");
+            }
+
+            Console.WriteLine();
         }
 
         static void GetActors(PagilaContext context)
